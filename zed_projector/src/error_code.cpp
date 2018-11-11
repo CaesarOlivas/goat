@@ -32,7 +32,7 @@
 // ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#include <zed_projector/common.h>
+#include <zed_projector/error_code.h>
 
 #include <string>
 
@@ -64,7 +64,7 @@ const std::error_category& zed_category() noexcept {
 namespace sl {
 
 std::error_code make_error_code(ERROR_CODE code) {
-	return { static_cast<int>(code), zed_depth::zed_category() };
+	return { static_cast<int>(code), zed_projector::zed_category() };
 }
 
 } // namespace sl
