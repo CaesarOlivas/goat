@@ -57,5 +57,5 @@ int get_cv_type(const sl::Mat &mat) {
         case sl::MAT_TYPE_8U_C2: return CV_8UC2;
         case sl::MAT_TYPE_8U_C3: return CV_8UC3;
         case sl::MAT_TYPE_8U_C4: return CV_8UC4;
-	}
+    }
 }
