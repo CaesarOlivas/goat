@@ -35,24 +35,31 @@
 #ifndef ZED_PROJECTOR_PROJECTOR_NODELET_H
 #define ZED_PROJECTOR_PROJECTOR_NODELET_H
 
+#include <zed_projector/posix_clock.h>
+
+#include <cstddef>
+
+#include <utility>
+
 #include <sl/Camera.hpp>
 
-#include <image_transport/image_transport.h>
-#include <nodelet/nodelet.h>
-#include <ros/ros.h>
+#include <opencv2/opencv.hpp>
 
-namespace zed_projector {
+#include <tf2/LinearMath/Transform.h>
 
-class Projector : public nodelet::Nodelet {
+namespace zp {
+
+class Projector {
 public:
-	void onInit() override;
+	std::pair<cv::Mat, PosixClock::time_point> project(const tf2::Transform &transform);
 
 private:
-	class Impl;
-
-	Impl *impl_ = nullptr;
+	sl::Camera camera_;
+	double resolution_ = 0.01; // meters per pixel
+	int height_ = 2000; // pixels in y direction
+	int width_ = 2000; // pixels in x direction
 };
 
-} // namespace zed_projector
+} // namespace zp
 
 #endif
