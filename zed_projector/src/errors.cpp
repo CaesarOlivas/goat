@@ -32,30 +32,39 @@
 // ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef ZED_PROJECTOR_ERROR_CODE_H
-#define ZED_PROJECTOR_ERROR_CODE_H
+#include <zed_projector/errors.h>
 
-#include <system_error>
+#include <string>
 
-#include <sl/Core.hpp>
+namespace zp {
 
-namespace zed_projector {
+struct ZedCategory : std::error_category {
+	virtual ~ZedCategory() = default;
 
-const std::error_category& zed_category() noexcept;
+	const char* name() const noexcept override {
+		return "zed";
+	}
 
-} // namespace zed_projector
+	std::string message(int condition) const override {
+		const auto code = static_cast<sl::ERROR_CODE>(condition);
+		auto msg = sl::toString(code);
 
-namespace std {
+		return { msg.get(), msg.size() };
+	}
+};
 
-template <>
-struct is_error_code_enum<sl::ERROR_CODE> : true_type { };
+const std::error_category& zed_category() noexcept {
+	static const ZedCategory category;
 
-} // namespace std
+	return category;
+}
+
+} // namespace zp
 
 namespace sl {
 
-std::error_code make_error_code(ERROR_CODE code);
+std::error_code make_error_code(ERROR_CODE code) {
+	return { static_cast<int>(code), zp::zed_category() };
+}
 
 } // namespace sl
-
-#endif

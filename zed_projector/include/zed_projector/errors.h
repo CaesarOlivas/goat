@@ -32,39 +32,39 @@
 // ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#include <zed_projector/error_code.h>
+#ifndef ZED_PROJECTOR_ERRORS_H
+#define ZED_PROJECTOR_ERRORS_H
 
-#include <string>
+#include <system_error>
 
-namespace zed_projector {
+#include <sl/Core.hpp>
 
-struct ZedCategory : std::error_category {
-	virtual ~ZedCategory() = default;
+namespace zp {
 
-	const char* name() const noexcept override {
-		return "zed";
-	}
+class NoTimestampAvailable : public std::logic_error {
+public:
+	explicit NoTimestampAvailable(const std::string &what) : std::logic_error{ what } { }
 
-	std::string message(int condition) const override {
-		const auto code = static_cast<sl::ERROR_CODE>(condition);
-		auto msg = sl::toString(code);
+	explicit NoTimestampAvailable(const char *what) : std::logic_error{ what } { }
 
-		return { msg.get(), msg.size() };
-	}
+	virtual ~NoTimestampAvailable() = default;
 };
 
-const std::error_category& zed_category() noexcept {
-	static const ZedCategory category;
+const std::error_category& zed_category() noexcept;
 
-	return category;
-}
+} // namespace zp
 
-} // namespace zed_projector
+namespace std {
+
+template <>
+struct is_error_code_enum<sl::ERROR_CODE> : true_type { };
+
+} // namespace std
 
 namespace sl {
 
-std::error_code make_error_code(ERROR_CODE code) {
-	return { static_cast<int>(code), zed_projector::zed_category() };
-}
+std::error_code make_error_code(ERROR_CODE code);
 
 } // namespace sl
+
+#endif
