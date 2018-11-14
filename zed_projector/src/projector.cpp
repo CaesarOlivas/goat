@@ -97,7 +97,7 @@ std::pair<cv::Mat, PosixClock::time_point> Projector::project(const tf2::Transfo
 
 			float &height = heights.at<float>(*maybe_ij);
 
-			if (transformed.z() <= height) {
+			if (transformed.z() > max_height_ || transformed.z() <= height) {
 				continue;
 			}
 
