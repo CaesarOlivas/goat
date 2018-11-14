@@ -38,26 +38,42 @@
 #include <zed_projector/posix_clock.h>
 
 #include <cstddef>
-
 #include <utility>
 
-#include <sl/Camera.hpp>
-
+#include <boost/optional.hpp>
 #include <opencv2/opencv.hpp>
-
+#include <sl/Camera.hpp>
 #include <tf2/LinearMath/Transform.h>
 
 namespace zp {
 
+// defines a 20m x 20m map with 1cm cells
+constexpr double DEFAULT_RESOLUTION = 0.01;
+constexpr double DEFAULT_MAX_HEIGHT = 1;
+constexpr int DEFAULT_ROWS = 2000;
+constexpr int DEFAULT_COLS = 2000;
+
+struct ProjectorConfig {
+	double resolution = DEFAULT_RESOLUTION;
+	double max_height = DEFAULT_MAX_HEIGHT;
+	int rows = DEFAULT_ROWS;
+	int cols = DEFAULT_COLS;
+};
+
 class Projector {
 public:
+	Projector(sl::InitParameters params, ProjectorConfig config = ProjectorConfig{ });
+
 	std::pair<cv::Mat, PosixClock::time_point> project(const tf2::Transform &transform);
 
 private:
+	boost::optional<cv::Vec2i> get_projected_indices(double x, double y) const noexcept;
+
 	sl::Camera camera_;
-	double resolution_ = 0.01; // meters per pixel
-	int height_ = 2000; // pixels in y direction
-	int width_ = 2000; // pixels in x direction
+	double resolution_ = DEFAULT_RESOLUTION; // meters per pixel
+	double max_height_ = DEFAULT_MAX_HEIGHT; // max height of points
+	int rows_ = DEFAULT_ROWS; // pixels in y direction
+	int cols_ = DEFAULT_COLS; // pixels in x direction
 };
 
 } // namespace zp
