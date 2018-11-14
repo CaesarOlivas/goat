@@ -41,14 +41,14 @@
 namespace zp {
 
 struct PosixClock {
-	using rep = std::chrono::nanoseconds::rep;
-	using period = std::chrono::nanoseconds::period;
-	using duration = std::chrono::nanoseconds;
-	using time_point = std::chrono::time_point<PosixClock>;
+    using rep = std::chrono::nanoseconds::rep;
+    using period = std::chrono::nanoseconds::period;
+    using duration = std::chrono::nanoseconds;
+    using time_point = std::chrono::time_point<PosixClock>;
 
-	static constexpr bool is_steady = false;
+    static constexpr bool is_steady = false;
 
-	static time_point now() noexcept;
+    static time_point now() noexcept;
 };
 
 } // namespace zp

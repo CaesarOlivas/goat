@@ -54,26 +54,26 @@ constexpr int DEFAULT_ROWS = 2000;
 constexpr int DEFAULT_COLS = 2000;
 
 struct ProjectorConfig {
-	double resolution = DEFAULT_RESOLUTION;
-	double max_height = DEFAULT_MAX_HEIGHT;
-	int rows = DEFAULT_ROWS;
-	int cols = DEFAULT_COLS;
+    double resolution = DEFAULT_RESOLUTION;
+    double max_height = DEFAULT_MAX_HEIGHT;
+    int rows = DEFAULT_ROWS;
+    int cols = DEFAULT_COLS;
 };
 
 class Projector {
 public:
-	Projector(sl::InitParameters params, ProjectorConfig config = ProjectorConfig{ });
+    Projector(sl::InitParameters params, ProjectorConfig config = ProjectorConfig{ });
 
-	std::pair<cv::Mat, PosixClock::time_point> project(const tf2::Transform &transform);
+    std::pair<cv::Mat, PosixClock::time_point> project(const tf2::Transform &transform);
 
 private:
-	boost::optional<cv::Vec2i> get_projected_indices(double x, double y) const noexcept;
+    boost::optional<cv::Vec2i> get_projected_indices(double x, double y) const noexcept;
 
-	sl::Camera camera_;
-	double resolution_ = DEFAULT_RESOLUTION; // meters per pixel
-	double max_height_ = DEFAULT_MAX_HEIGHT; // max height of points
-	int rows_ = DEFAULT_ROWS; // pixels in y direction
-	int cols_ = DEFAULT_COLS; // pixels in x direction
+    sl::Camera camera_;
+    double resolution_ = DEFAULT_RESOLUTION; // meters per pixel
+    double max_height_ = DEFAULT_MAX_HEIGHT; // max height of points
+    int rows_ = DEFAULT_ROWS; // pixels in y direction
+    int cols_ = DEFAULT_COLS; // pixels in x direction
 };
 
 } // namespace zp

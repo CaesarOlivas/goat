@@ -39,15 +39,15 @@
 namespace zp {
 
 PosixClock::time_point PosixClock::now() noexcept {
-	timespec tp;
+    timespec tp;
 
-	// there's no way this can fail -- all POSIX implementations
-	// support CLOCK_REALTIME, tp is on the stack (in valid address
-	// space), and we're not calling clock_settime.
-	clock_gettime(CLOCK_REALTIME, &tp);
+    // there's no way this can fail -- all POSIX implementations
+    // support CLOCK_REALTIME, tp is on the stack (in valid address
+    // space), and we're not calling clock_settime.
+    clock_gettime(CLOCK_REALTIME, &tp);
 
-	return time_point{ std::chrono::seconds{ tp.tv_sec }
-					   + std::chrono::nanoseconds{ tp.tv_nsec } };
+    return time_point{ std::chrono::seconds{ tp.tv_sec }
+                       + std::chrono::nanoseconds{ tp.tv_nsec } };
 }
 
 } // namespace zp

@@ -39,24 +39,24 @@
 namespace zp {
 
 struct ZedCategory : std::error_category {
-	virtual ~ZedCategory() = default;
+    virtual ~ZedCategory() = default;
 
-	const char* name() const noexcept override {
-		return "zed";
-	}
+    const char* name() const noexcept override {
+        return "zed";
+    }
 
-	std::string message(int condition) const override {
-		const auto code = static_cast<sl::ERROR_CODE>(condition);
-		auto msg = sl::toString(code);
+    std::string message(int condition) const override {
+        const auto code = static_cast<sl::ERROR_CODE>(condition);
+        auto msg = sl::toString(code);
 
-		return { msg.get(), msg.size() };
-	}
+        return { msg.get(), msg.size() };
+    }
 };
 
 const std::error_category& zed_category() noexcept {
-	static const ZedCategory category;
+    static const ZedCategory category;
 
-	return category;
+    return category;
 }
 
 } // namespace zp
@@ -64,7 +64,7 @@ const std::error_category& zed_category() noexcept {
 namespace sl {
 
 std::error_code make_error_code(ERROR_CODE code) {
-	return { static_cast<int>(code), zp::zed_category() };
+    return { static_cast<int>(code), zp::zed_category() };
 }
 
 } // namespace sl

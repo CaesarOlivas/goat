@@ -43,11 +43,11 @@ namespace zp {
 
 class NoTimestampAvailable : public std::logic_error {
 public:
-	explicit NoTimestampAvailable(const std::string &what) : std::logic_error{ what } { }
+    explicit NoTimestampAvailable(const std::string &what) : std::logic_error{ what } { }
 
-	explicit NoTimestampAvailable(const char *what) : std::logic_error{ what } { }
+    explicit NoTimestampAvailable(const char *what) : std::logic_error{ what } { }
 
-	virtual ~NoTimestampAvailable() = default;
+    virtual ~NoTimestampAvailable() = default;
 };
 
 const std::error_category& zed_category() noexcept;
