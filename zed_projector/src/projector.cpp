@@ -35,33 +35,24 @@
 #include <zed_projector/projector.h>
 
 #include <zed_projector/errors.h>
+#include <zed_projector/zed_utils.h>
 
 #include <cmath>
 #include <cstdint>
+#include <future>
 #include <limits>
+#include <thread>
+#include <type_traits>
+#include <utility>
+#include <vector>
 
 #include <tf2/LinearMath/Vector3.h>
 
 namespace zp {
 
-struct XyzBgr {
-    tf2::Vector3 xyz;
-    cv::Vec3b bgr;
-};
-
-static void open(sl::Camera &camera, sl::InitParameters params);
-
-static std::pair<sl::Mat, PosixClock::time_point> grab_and_retrieve_pointcloud(sl::Camera &camera);
-
-static XyzBgr get_value(const sl::Mat &mat, int x, int y);
+static bool is_finite(const tf2::Vector3 &vec);
 
 static bool can_narrow_to_int(double x) noexcept;
-
-static void grab(sl::Camera &camera);
-
-static PosixClock::time_point get_image_timestamp(sl::Camera &camera);
-
-static sl::Mat retrieve_measure(sl::Camera &camera, sl::MEASURE measure);
 
 Projector::Projector(sl::InitParameters params, ProjectorConfig config)
 : resolution_{ config.resolution }, max_height_{ config.max_height },
@@ -85,9 +76,13 @@ std::pair<cv::Mat, PosixClock::time_point> Projector::project(const tf2::Transfo
                      cv::Scalar(-std::numeric_limits<float>::infinity()) };
 
     for (int i = 0; i < static_cast<int>(pointcloud.getHeight()); ++i) {
-        for (int j = 0; i < static_cast<int>(pointcloud.getWidth()); ++j) {
+        for (int j = 0; j < static_cast<int>(pointcloud.getWidth()); ++j) {
             const XyzBgr elem = get_value(pointcloud, i, j);
             const tf2::Vector3 transformed = transform * elem.xyz;
+
+            if (!is_finite(transformed)) {
+                continue;
+            }
 
             const auto maybe_ij = get_projected_indices(transformed.x(), transformed.y());
 
@@ -130,39 +125,8 @@ Projector::get_projected_indices(double x, double y) const noexcept {
     return { { i, j } };
 }
 
-void open(sl::Camera &camera, sl::InitParameters params) {
-    const std::error_code opened = camera.open(std::move(params));
-
-    if (!opened) {
-        throw std::system_error{ opened, "sl::Camera::open" };
-    }
-}
-
-std::pair<sl::Mat, PosixClock::time_point> grab_and_retrieve_pointcloud(sl::Camera &camera) {
-    grab(camera);
-    const auto timestamp = get_image_timestamp(camera);
-    sl::Mat points = retrieve_measure(camera, sl::MEASURE_XYZRGBA);
-
-    assert(points.getDataType() == sl::MAT_TYPE_32F_C4);
-
-    return { points, timestamp };
-}
-
-XyzBgr get_value(const sl::Mat &mat, int i, int j) {
-    assert(i >= 0 && i < static_cast<int>(mat.getHeight()));
-    assert(j >= 0 && j < static_cast<int>(mat.getWidth()));
-
-    sl::float4 value;
-    const std::error_code got = mat.getValue(static_cast<std::size_t>(i),
-                                             static_cast<std::size_t>(j), &value);
-
-    if (!got) {
-        throw std::system_error{ got, "sl::Mat::getValue" };
-    }
-
-    const sl::uchar4 rgba{ reinterpret_cast<const unsigned char*>(&value.w) };
-
-    return { { value.x, value.y, value.z }, { rgba.b, rgba.g, rgba.r } };
+bool is_finite(const tf2::Vector3 &vec) {
+    return std::isfinite(vec.x()) && std::isfinite(vec.y()) && std::isfinite(vec.z());
 }
 
 bool can_narrow_to_int(double x) noexcept {
@@ -170,35 +134,6 @@ bool can_narrow_to_int(double x) noexcept {
     static constexpr auto MAX = static_cast<double>(std::numeric_limits<int>::max());
 
     return std::isfinite(x) && x <= MAX && x >= MIN;
-}
-
-void grab(sl::Camera &camera) {
-    const std::error_code grabbed = camera.grab();
-
-    if (!grabbed) {
-        throw std::system_error{ grabbed, "sl::Camera::grab" };
-    }
-}
-
-PosixClock::time_point get_image_timestamp(sl::Camera &camera) {
-    const auto timestamp = camera.getTimestamp(sl::TIME_REFERENCE_IMAGE);
-
-    if (timestamp == 0) {
-        throw NoTimestampAvailable{ "zp::get_image_timestamp" };
-    }
-
-    return PosixClock::time_point{ PosixClock::duration{ timestamp } };
-}
-
-sl::Mat retrieve_measure(sl::Camera &camera, sl::MEASURE measure) {
-    sl::Mat data;
-    const std::error_code retrieved = camera.retrieveMeasure(data, measure);
-
-    if (!retrieved) {
-        throw std::system_error{ retrieved, "sl::Camera::retrieveMeasure" };
-    }
-
-    return data;
 }
 
 } // namespace zp
