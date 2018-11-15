@@ -48,10 +48,10 @@
 namespace zp {
 
 // defines a 20m x 20m map with 1cm cells
-constexpr double DEFAULT_RESOLUTION = 0.01;
+constexpr double DEFAULT_RESOLUTION = 0.1;
 constexpr double DEFAULT_MAX_HEIGHT = 1;
-constexpr int DEFAULT_ROWS = 2000;
-constexpr int DEFAULT_COLS = 2000;
+constexpr int DEFAULT_ROWS = 200;
+constexpr int DEFAULT_COLS = 200;
 
 struct ProjectorConfig {
     double resolution = DEFAULT_RESOLUTION;
