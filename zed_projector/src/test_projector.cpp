@@ -18,5 +18,13 @@ int main() {
     params.coordinate_system = sl::COORDINATE_SYSTEM_RIGHT_HANDED_Z_UP_X_FWD;
 
     zp::Projector projector{ std::move(params) };
-    const auto img_stamp = projector.project(eye);
+
+    cv::namedWindow("window", cv::WINDOW_AUTOSIZE);
+
+    while (true) {
+	    const auto img_stamp = projector.project(eye);
+
+	    cv::imshow("window", img_stamp.first);
+	    cv::waitKey(4);
+    }
 }
